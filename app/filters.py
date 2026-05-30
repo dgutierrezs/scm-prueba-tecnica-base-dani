@@ -2,6 +2,7 @@ from sqlalchemy import Select, text
 from fastapi import  HTTPException, status
 from app.models import Item
 
+
 def apply_filters(stmt: Select, filters: list) -> Select:
     """
     Aplica una cadena de filtros a un Select.
@@ -14,10 +15,16 @@ def apply_filters(stmt: Select, filters: list) -> Select:
       - Valores siempre parametrizados.
       - 400 ante filtros inválidos.
     """
-
+    MAX_FILTERS = 10
 
     if not filters:
         return stmt
+    
+    if len(filters) > MAX_FILTERS:
+      raise HTTPException(
+        status_code=400,
+        detail=f"Máximo {MAX_FILTERS} filtros"
+    )
     allowed_fields = {
         column.key for column in Item.__table__.columns
     }
@@ -60,7 +67,8 @@ def apply_filters(stmt: Select, filters: list) -> Select:
         elif filter.operator == "is null":
             column = getattr(Item, filter.field)
             stmt = stmt.where(column.is_(None)) 
-
+    
+    
     return stmt
             
 
