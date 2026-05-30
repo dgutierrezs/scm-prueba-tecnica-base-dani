@@ -1,5 +1,6 @@
 from sqlalchemy import Select, text
 from fastapi import  HTTPException, status
+from app.models import Item
 
 def apply_filters(stmt: Select, filters: str | None) -> Select:
     """
@@ -30,6 +31,10 @@ def apply_filters(stmt: Select, filters: str | None) -> Select:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Campo no permitido: {filter.field}"
 )
+        if filter.operator == "=":
+            column = getattr(Item, filter.field)
+            stmt = stmt.where(column == filter.value)
+            
     return stmt
             
 
