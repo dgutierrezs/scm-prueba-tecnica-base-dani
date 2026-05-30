@@ -2,7 +2,7 @@ from sqlalchemy import Select, text
 from fastapi import  HTTPException, status
 from app.models import Item
 
-def apply_filters(stmt: Select, filters: str | None) -> Select:
+def apply_filters(stmt: Select, filters: list) -> Select:
     """
     Aplica una cadena de filtros a un Select.
 
