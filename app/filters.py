@@ -18,8 +18,10 @@ def apply_filters(stmt: Select, filters: str | None) -> Select:
 
     if not filters:
         return stmt
-    allowed_fields = {"id", "sku", "status", "warehouse_id", "created_at"}
-    allowed_operators = {"=", "!=", ">", "<", "LIKE", "IN", "IS NOT"}
+    allowed_fields = {
+        column.key for column in Item.__table__.columns
+    }
+    allowed_operators = {"=", "!=", ">", "<", "LIKE", "IN", "IS null"}
     for filter in filters:
         if filter.operator not in allowed_operators:
             raise HTTPException(
@@ -34,7 +36,31 @@ def apply_filters(stmt: Select, filters: str | None) -> Select:
         if filter.operator == "=":
             column = getattr(Item, filter.field)
             stmt = stmt.where(column == filter.value)
-            
+        
+        elif filter.operator == "!=":
+            column = getattr(Item, filter.field)
+            stmt = stmt.where(column != filter.value)
+
+        elif filter.operator == ">":
+            column = getattr(Item, filter.field)
+            stmt = stmt.where(column > filter.value)
+
+        elif filter.operator == "<":
+            column = getattr(Item, filter.field)
+            stmt = stmt.where(column < filter.value)
+
+        elif filter.operator == "LIKE":
+            column = getattr(Item, filter.field)
+            stmt = stmt.where(column.like(filter.value))
+
+        elif filter.operator == "IN":
+            column = getattr(Item, filter.field)
+            stmt = stmt.where(column.in_(filter.value))
+        
+        elif filter.operator == "is null":
+            column = getattr(Item, filter.field)
+            stmt = stmt.where(column.is_(None)) 
+
     return stmt
             
 
