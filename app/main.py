@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -52,10 +52,14 @@ class TokenPair(BaseModel):
 class RefreshRequest(BaseModel):
     refresh_token: str
 
+class Filter(BaseModel):
+    field: str
+    operator: str
+    value: Any | None = None
 
 class SearchRequest(BaseModel):
     # TODO (candidato): diseña aquí el contrato de filtros estructurados.
-    filters: str | None = None
+    filters: list[Filter] | None = None
 
 
 class ItemOut(BaseModel):
